@@ -1,6 +1,8 @@
 const Block = require("./block")
 
 const MINING_DIFFICULTY = 3;
+const MINING_REWARD = 1;
+const MINING_SENDER = "THE BLOCKCHAIN"
 
 function Blockchain(blockchainAdress){
     this.chain = [this.createFirstBlock()];
@@ -15,6 +17,11 @@ Blockchain.prototype.createFirstBlock = function(){
 Blockchain.prototype.getLatestBlock = function() {
     return this.chain[this.chain.length - 1];
 };
+
+Blockchain.prototype.createBlock = function(nonce, previousHash){
+    let newBlock = new Block(nonce, this.transactionPool, previousHash);
+    this.chain.push(newBlock);
+}
 
 Blockchain.prototype.addTransaction = function(sender, recipient, value) {
     let transaction = new Transaction(sender, recipient, value);
@@ -40,4 +47,13 @@ Blockchain.prototype.proofOfWork = function(){
         nonce +=1;
     }
     return nonce;
+}
+
+Blockchain.prototype.Mining = function(){
+    this.addTransaction(MINING_SENDER, this.blockchainAdress, MINING_REWARD);
+    nonce = this.proofOfWork;
+    previousHash = bc.getLatestBlock().calculateHash();
+    this.createBlock(nonce, previousHash);
+    console.log("action=mining, status=success")
+    return true;
 }
