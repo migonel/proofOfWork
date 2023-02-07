@@ -1,8 +1,8 @@
+//Transaction class
 function Transaction(sender, recipient, value){
-    this.senderBlockchainAddres = sender;
+    this.senderBlockchainAddress = sender;
     this.recipientBlockchainAddress = recipient;
     this.value = value;
-    this
 };
 
 module.exports = Transaction;
