@@ -41,11 +41,15 @@ Blockchain.prototype.copyTransctionPool = function(){
     return transactions;
 };
 
-//Boolean function: returns true if the nonce value generated a valid hash as proof
-Blockchain.prototype.validProof = function(nonce, previousHash, transactions, difficulty) {
+Blockchain.prototype.guessHash = function(nonce, previousHash, transactions){
     let guessBlock = new Block(nonce, previousHash,transactions);
     let guessHash = guessBlock.calculateHash();
-    console.log(guessHash);
+    return guessHash;
+};
+
+//Boolean function: returns true if the nonce value generated a valid hash as proof
+Blockchain.prototype.validProof = function(nonce, previousHash, transactions, difficulty) {
+    let guessHash = this.guessHash(nonce,previousHash,transactions);
     return guessHash.substring(0,difficulty) === "000";
 };
 
@@ -60,12 +64,23 @@ Blockchain.prototype.proofOfWork = function(){
     return nonce;
 };
 
+
+
+Blockchain.prototype.manualValidProof = function(nonce){
+    transactions = this.copyTransctionPool();
+    previousHash = this.getLatestBlock().calculateHash();
+    let guessHash = this.guessHash(nonce, previousHash, transactions);
+    return guessHash.substring(0,MINING_DIFFICULTY) == "000"; 
+
+};
+
 //Function to mine a block. Adds a transaction to reward the miner. Returns true if the block was mined
 Blockchain.prototype.Mining = function(){
     this.addTransaction(MINING_SENDER, this.blockchainAdress, MINING_REWARD);
     let nonce = this.proofOfWork();
     previousHash = this.getLatestBlock().calculateHash();
     this.createBlock(nonce, previousHash);
+    this.transactionPool = [];
     console.log("action=mining, status=success")
     return true;
 };
@@ -84,6 +99,23 @@ Blockchain.prototype.log = function() {
     console.log("\n\n");
 };
 
+
+Blockchain.prototype.generateRandomTransactions = function() {
+    const senderAddresses = ['A', 'B', 'C', 'D', 'E'];
+    const recipientAddresses = ['F', 'G', 'H', 'I', 'J'];
+    const values = [1, 2, 3, 4, 5];
+
+    for (let i = 0; i < 3; i++) {
+        const sender = senderAddresses[Math.floor(Math.random() * senderAddresses.length)];
+        const recipient = recipientAddresses[Math.floor(Math.random() * recipientAddresses.length)];
+        const value = values[Math.floor(Math.random() * values.length)];
+        this.addTransaction(sender, recipient, value);
+    }
+};
+
+
+
+
 Blockchain.prototype.getTotalAmountForAddress = function(address) {
     let totalAmount = 0;
   
@@ -92,7 +124,7 @@ Blockchain.prototype.getTotalAmountForAddress = function(address) {
   
       for (let j = 0; j < block.transactions.length; j++) {
         let transaction = block.transactions[j];
-        
+
         if (JSON.stringify(transaction.senderBlockchainAddress) == JSON.stringify(address)) {
           totalAmount -= transaction.value;
         }
@@ -104,25 +136,33 @@ Blockchain.prototype.getTotalAmountForAddress = function(address) {
     }
   
     return totalAmount;
-  };
+};
+
 
 //Create blockchain to test
 let myBlockchain = new Blockchain("blockchain_address");
 
-//Create some transactions to test
-myBlockchain.addTransaction('a', 'b', 1);
-myBlockchain.addTransaction('b', 'c', 2);
-myBlockchain.addTransaction('c', 'a', 1);
+module.exports = Blockchain;
+
+myBlockchain.generateRandomTransactions();
 
 myBlockchain.log();
 
-console.log(myBlockchain.proofOfWork());
+// console.log(myBlockchain.manualValidProof(1));
+// console.log(myBlockchain.manualValidProof(4));
+// console.log(myBlockchain.manualValidProof(1000));
+// console.log(myBlockchain.manualValidProof(278));
+
 
 myBlockchain.Mining();
 myBlockchain.log();
-console.log("a:")
-console.log(myBlockchain.getTotalAmountForAddress("a"));
-console.log("b:")
-console.log(myBlockchain.getTotalAmountForAddress("b"));
-console.log("c:")
-console.log(myBlockchain.getTotalAmountForAddress("c"));
+
+myBlockchain.generateRandomTransactions();
+myBlockchain.Mining();
+myBlockchain.log();
+
+
+myBlockchain.generateRandomTransactions();
+myBlockchain.Mining();
+myBlockchain.log();
+

@@ -1,7 +1,7 @@
 const http = require("http"); //Import Http module
 const hostname = "localhost";
 const port = 3000;
-const Block = require("./block");
+const BlockChain = require("./blockchain");
 
 const myBlock = new Block(0, "Transacciones",1);
 const myBlockString = JSON.stringify(myBlock);
