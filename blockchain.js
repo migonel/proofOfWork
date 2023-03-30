@@ -65,7 +65,7 @@ Blockchain.prototype.proofOfWork = function(){
 };
 
 
-
+//Function to test nonce value manually
 Blockchain.prototype.manualValidProof = function(nonce){
     transactions = this.copyTransctionPool();
     previousHash = this.getLatestBlock().calculateHash();
@@ -139,10 +139,12 @@ Blockchain.prototype.getTotalAmountForAddress = function(address) {
 };
 
 
-//Create blockchain to test
-let myBlockchain = new Blockchain("blockchain_address");
+
 
 module.exports = Blockchain;
+
+//Create blockchain to test
+let myBlockchain = new Blockchain("blockchain_address");
 
 myBlockchain.generateRandomTransactions();
 
