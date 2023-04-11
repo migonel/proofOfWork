@@ -1,7 +1,7 @@
 const express = require('express');
 const Blockchain = require("../blockchain");
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use(express.json()); // parse JSON requests
 app.use(express.urlencoded({ extended: true })); // parse URL-encoded requests
@@ -20,20 +20,21 @@ app.get("/blockchain/transaction-pool", (req, res) => {
   res.status(200).json(myBlockchain.transactionPool);
 });
 
+// Generates random transactions in the blockchain
 app.post("/blockchain/transactions", (req,res) => {
     const newTransactions = myBlockchain.generateRandomTransactions();
   
     res.json({ message: "New transactions added to the transaction pool", transactions: newTransactions });
 });
 
-// Mine the pending transactions
+// Mines the pending transactions
 app.post("/blockchain/mine", (req, res) => {
   myBlockchain.Mining();
 
   res.status(200).json({ message: "Block mined" });
 });
 
-
+//  Test an inputed nonce value to check if generates a valid proof of work
 app.get("/blockchain/validProof/:nonce", (req, res) => {
     const nonce = req.params.nonce;
     const isValid = myBlockchain.manualValidProof(nonce);
@@ -41,12 +42,14 @@ app.get("/blockchain/validProof/:nonce", (req, res) => {
     res.json({ isValid });
 });
 
+// Get the nonce value that generates a valid proof of work for the next block
 app.get("/blockchain/getNonce", (req,res) => {
     const nonce = myBlockchain.proofOfWork();
 
     res.json({ nonce });
 });
 
+// Get the guessed hash obtained by using an inputed nonce value
 app.get('/blockchain/guesshash/:nonce', (req, res) => {
     const nonce = parseInt(req.params.nonce);
     const transactions = myBlockchain.copyTransctionPool();

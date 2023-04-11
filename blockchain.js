@@ -41,6 +41,8 @@ Blockchain.prototype.copyTransctionPool = function(){
     return transactions;
 };
 
+//Function that uses a nonce value, the hash of the previous block and the transactions data, to generate a hash.
+//if this hash verify certain conditions, the nonce value can be used as valid proof of work to create a new block
 Blockchain.prototype.guessHash = function(nonce, previousHash, transactions){
     let guessBlock = new Block(nonce, previousHash,transactions);
     let guessHash = guessBlock.calculateHash();
