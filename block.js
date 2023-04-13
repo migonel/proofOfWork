@@ -4,7 +4,6 @@ const crypto = require('crypto');
 function Block(nonce, transactions, previousHash){
     this.transactions = transactions;
     this.previousHash = previousHash;
-    this.hash = this.calculateHash();
     this.nonce = nonce;
 }
 

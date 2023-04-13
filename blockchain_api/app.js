@@ -44,7 +44,7 @@ app.get("/blockchain/validProof/:nonce", (req, res) => {
 
 // Get the nonce value that generates a valid proof of work for the next block
 app.get("/blockchain/getNonce", (req,res) => {
-    const nonce = myBlockchain.proofOfWork();
+    const nonce = myBlockchain.testProofOfWork();
 
     res.json({ nonce });
 });
@@ -52,9 +52,11 @@ app.get("/blockchain/getNonce", (req,res) => {
 // Get the guessed hash obtained by using an inputed nonce value
 app.get('/blockchain/guesshash/:nonce', (req, res) => {
     const nonce = parseInt(req.params.nonce);
+    myBlockchain.addTransaction(myBlockchain.blockchainAdress, "THE MINER",  1)
     const transactions = myBlockchain.copyTransctionPool();
     const previousHash = myBlockchain.getLatestBlock().calculateHash();
     const guessHash = myBlockchain.guessHash(nonce, previousHash, transactions);
+    myBlockchain.deleteLastTransaction();
     res.json({nonce, guessHash});
 });
 

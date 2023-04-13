@@ -3,7 +3,7 @@ const Transaction = require("./transaction");
 
 const MINING_DIFFICULTY = 3;
 const MINING_REWARD = 1;
-const MINING_SENDER = "THE BLOCKCHAIN"
+const MINING_SENDER = "THE MINER"
 
 
 //Blockchain class
@@ -24,8 +24,8 @@ Blockchain.prototype.getLatestBlock = function() {
 };
 
 //Function to create a block in the chain (append a block to the chain)
-Blockchain.prototype.createBlock = function(nonce, previousHash){
-    let newBlock = new Block(nonce, this.transactionPool, previousHash);
+Blockchain.prototype.createBlock = function(nonce, transactions, previousHash){
+    let newBlock = new Block(nonce, transactions, previousHash);
     this.chain.push(newBlock);
 }
 
@@ -34,6 +34,10 @@ Blockchain.prototype.addTransaction = function(sender, recipient, value) {
     let transaction = new Transaction(sender, recipient, value);
     this.transactionPool.push(transaction);
 };
+
+Blockchain.prototype.deleteLastTransaction = function(){
+    this.transactionPool.pop();
+}
 
 //Function to make a copy of the transaction pool
 Blockchain.prototype.copyTransctionPool = function(){
@@ -44,7 +48,7 @@ Blockchain.prototype.copyTransctionPool = function(){
 //Function that uses a nonce value, the hash of the previous block and the transactions data, to generate a hash.
 //if this hash verify certain conditions, the nonce value can be used as valid proof of work to create a new block
 Blockchain.prototype.guessHash = function(nonce, previousHash, transactions){
-    let guessBlock = new Block(nonce, previousHash,transactions);
+    let guessBlock = new Block(nonce,transactions, previousHash);
     let guessHash = guessBlock.calculateHash();
     return guessHash;
 };
@@ -66,22 +70,37 @@ Blockchain.prototype.proofOfWork = function(){
     return nonce;
 };
 
+Blockchain.prototype.testProofOfWork = function(){
+    this.addTransaction(this.blockchainAdress, MINING_SENDER,  MINING_REWARD);
+    transactions = this.copyTransctionPool();
+    previousHash = this.getLatestBlock().calculateHash();
+    nonce = 0;
+    while (this.validProof(nonce, previousHash, transactions, MINING_DIFFICULTY) == false){
+        nonce +=1;
+    }
+    this.deleteLastTransaction();
+    return nonce;
+};
+
 
 //Function to test nonce value manually
 Blockchain.prototype.manualValidProof = function(nonce){
+    this.addTransaction(this.blockchainAdress, MINING_SENDER,  MINING_REWARD);
     transactions = this.copyTransctionPool();
     previousHash = this.getLatestBlock().calculateHash();
     let guessHash = this.guessHash(nonce, previousHash, transactions);
+    this.deleteLastTransaction();
     return guessHash.substring(0,MINING_DIFFICULTY) == "000"; 
 
 };
 
 //Function to mine a block. Adds a transaction to reward the miner. Returns true if the block was mined
 Blockchain.prototype.Mining = function(){
-    this.addTransaction(MINING_SENDER, this.blockchainAdress, MINING_REWARD);
+    this.addTransaction(this.blockchainAdress, MINING_SENDER,  MINING_REWARD);
     let nonce = this.proofOfWork();
-    previousHash = this.getLatestBlock().calculateHash();
-    this.createBlock(nonce, previousHash);
+    let previousHash = this.getLatestBlock().calculateHash();
+    let transactions = this.copyTransctionPool();
+    this.createBlock(nonce, transactions, previousHash);
     this.transactionPool = [];
     console.log("action=mining, status=success")
     return true;
@@ -92,7 +111,7 @@ Blockchain.prototype.log = function() {
     console.log("########## Blockchain ##########");
     for (let i = 0; i < this.chain.length; i++) {
         console.log('-----------------------------------------------------------')
-      console.log(`\nBlock ${i}:\nHash:\t\t${this.chain[i].hash}`);
+      console.log(`\nBlock ${i}:\nHash:\t\t${this.chain[i].calculateHash()}`);
       console.log(`Previous Hash:\t${this.chain[i].previousHash}`);
       console.log(`Nonce: ${this.chain[i].nonce}`);
       console.log(`Transactions: ${JSON.stringify(this.chain[i].transactions)}`);
@@ -162,6 +181,7 @@ myBlockchain.Mining();
 myBlockchain.log();
 
 myBlockchain.generateRandomTransactions();
+
 myBlockchain.Mining();
 myBlockchain.log();
 
@@ -169,4 +189,12 @@ myBlockchain.log();
 myBlockchain.generateRandomTransactions();
 myBlockchain.Mining();
 myBlockchain.log();
+
+
+
+console.log(myBlockchain.chain);
+console.log(myBlockchain.chain[3]);
+console.log("----------")
+console.log(myBlockchain.getLatestBlock());
+console.log(myBlockchain.getLatestBlock().calculateHash())
 
